@@ -47,18 +47,22 @@ http.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { config, response } = error;
-    const shouldRefresh = response?.status === 401 && !config._retried && !isAuthEndpoint(config.url);
+    const shouldRefresh = response?.status === 401 && config && !config._retried && !isAuthEndpoint(config.url);
 
     if (!shouldRefresh) return Promise.reject(error);
 
     config._retried = true;
     try {
       await refreshSession();
-      return http(config);
-    } catch {
-      accessToken = null;
-      onSessionExpired();
+    } catch (refreshError) {
+      // Only a rejected refresh token means the session is really over. A network blip or a server
+      // error while refreshing must not log the user out; they can simply try again.
+      if (refreshError.response?.status === 401) {
+        accessToken = null;
+        onSessionExpired();
+      }
       return Promise.reject(error);
     }
+    return http(config);
   },
 );

@@ -17,12 +17,13 @@ export const apiLimiter = rateLimit({
   skip,
 });
 
-// Much stricter on credential endpoints to slow down brute-force / credential stuffing.
+// Much stricter on login/register to slow down brute-force / credential stuffing.
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 20,
   standardHeaders: "draft-7",
   legacyHeaders: false,
+  skipSuccessfulRequests: true, // only failed attempts count, so normal users are never punished
   message: tooManyRequests("Too many attempts, try again in 15 minutes"),
   skip,
 });

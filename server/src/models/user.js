@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
-
-const SALT_ROUNDS = 10;
+import { env } from "../config/env.js";
 
 const userSchema = new Schema(
   {
@@ -15,7 +14,7 @@ const userSchema = new Schema(
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
-  this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
+  this.password = await bcrypt.hash(this.password, env.BCRYPT_ROUNDS);
 });
 
 userSchema.methods.comparePassword = function (candidate) {

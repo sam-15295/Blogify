@@ -8,6 +8,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_SECRET: z.string().min(32, "ACCESS_TOKEN_SECRET must be at least 32 characters"),
   ACCESS_TOKEN_TTL: z.string().default("15m"),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
+  BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(14).default(10),
   UPLOAD_DIR: z.string().default("uploads"),
   MAX_UPLOAD_MB: z.coerce.number().positive().default(2),
 });

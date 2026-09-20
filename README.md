@@ -76,28 +76,29 @@ All routes are prefixed with `/api`. Successful responses are `{ data, meta? }`;
 |---|---|---|---|
 | POST | `/auth/register` | – | Create an account |
 | POST | `/auth/login` | – | Log in; returns an access token and sets the refresh cookie |
-| POST | `/auth/refresh` | cookie | Rotate the refresh token, issue a new access token |
-| POST | `/auth/logout` | cookie | Revoke the refresh token |
+| POST | `/auth/refresh` | cookie | Rotate the refresh token (single use) and issue a new access token; replaying an old token revokes the session |
+| POST | `/auth/logout` | cookie | Revoke the whole session |
 | GET | `/auth/me` | access token | Current user |
 | GET | `/blogs?page=&limit=&q=` | – | Paginated list, newest first; `q` performs text search |
 | GET | `/blogs/:id` | – | Single post |
 | POST | `/blogs` | access token | Create a post (`multipart/form-data`, optional `coverImage`) |
-| PATCH | `/blogs/:id` | owner / admin | Update a post |
+| PATCH | `/blogs/:id` | owner / admin | Update the title, body and/or cover image |
 | DELETE | `/blogs/:id` | owner / admin | Delete a post and its comments |
 | GET | `/blogs/:id/comments` | – | Paginated comments |
 | POST | `/blogs/:id/comments` | access token | Add a comment |
 | DELETE | `/comments/:id` | owner / admin | Delete a comment |
 
-Status codes: `400` malformed request, `401` not authenticated, `403` not allowed, `404` not found, `409` duplicate, `422` validation failed, `429` rate limited.
+Status codes: `400` malformed request, `401` not authenticated, `403` not allowed, `404` not found, `409` duplicate, `413` body too large, `422` validation failed, `429` rate limited, `502` image storage unavailable.
 
 ## Design decisions
 
-- **Short-lived access token + rotating refresh token.** The access token (15 min) is kept in memory by the SPA and sent as a header. The refresh token is an opaque random string in an `httpOnly` cookie scoped to `/api/auth`; only its SHA-256 hash is stored, it is single-use, and it expires via a MongoDB TTL index.
-- **bcrypt with a configurable cost factor**, generic login errors to prevent account enumeration.
-- **Validation at the edge with Zod.** Strict string types also block NoSQL operator injection such as `{"email": {"$ne": null}}`.
-- **Central error handling.** Services throw `AppError`; one middleware converts everything (including Mongoose, Multer and JSON parse errors) to a consistent response and hides internals in production.
+- **Short-lived access token + rotating refresh token with reuse detection.** The access token (15 min) is kept in memory by the SPA and sent as a header. The refresh token is an opaque random string in an `httpOnly` cookie scoped to `/api/auth`; only its SHA-256 hash is stored and it is single use. Every login starts a token *family*: refreshing marks the token as used and issues the next one in the same family. If an already-used token is presented more than 10 seconds later (a stolen copy being replayed) the whole family is revoked; within 10 seconds it is treated as a second browser tab racing on the same cookie. Logout revokes the family, and a MongoDB TTL index removes expired tokens.
+- **bcrypt with a configurable cost factor.** Login gives the same error and does the same amount of work whether or not the email exists, so neither the message nor the response time reveals which accounts exist. Passwords are limited to bcrypt's 72 bytes so nothing is silently truncated.
+- **Validation at the edge with Zod**, with messages written for people ("Full name must be at least 2 characters"). Strict string types also block NoSQL operator injection such as `{"email": {"$ne": null}}`.
+- **Central error handling.** Services throw `AppError`; one middleware converts everything (including Mongoose, Multer and JSON parse errors, and oversized bodies) to a consistent response. Unexpected errors are logged and clients only see a generic message; stack traces are never sent in production.
 - **Indexed queries.** Newest-first listing, a weighted text index for search and a compound `(blog, createdAt)` index for comments. Pagination limits are capped.
 - **Uploads are constrained:** MIME allow-list, size limit, server-generated filenames. Files are held in memory and only stored *after* validation and authorization pass, so rejected requests leave nothing behind. A small storage layer writes to Cloudinary when configured and to local disk otherwise.
+- **Reliability.** Unhandled promise rejections and uncaught exceptions are logged and the process exits so the host restarts a clean one; shutdown is graceful with a time limit; a wrong database address fails within 10 seconds. In the React app, error boundaries turn a render error into a message instead of a blank page, and a network blip while renewing a session no longer logs the user out.
 - **The app is built by a factory (`createApp`)** so tests run against the real middleware stack without opening a port.
 
 ## Getting started
@@ -159,8 +160,8 @@ cd server
 npm test
 ```
 
-The suite runs against a real MongoDB (`mongodb://localhost:27017/blogify_test` by default, override with `MONGO_URI_TEST`) and covers registration and login, refresh-token rotation and revocation, authorization (owner vs. other user vs. admin), validation errors, pagination and search, upload restrictions, the Cloudinary storage adapter (with the SDK mocked) and cascading deletes.
+The suite (78 tests) runs against a real MongoDB (`mongodb://localhost:27017/blogify_test` by default, override with `MONGO_URI_TEST`). It covers registration and login, refresh-token rotation, parallel tabs, theft detection and logout, forged tokens, authorization (owner vs. other user vs. admin), validation messages, pagination and search, upload restrictions, the Cloudinary storage adapter (with the SDK mocked), the error handler (including production mode) and cascading deletes.
 
 ## Possible improvements
 
-Refresh-token reuse detection (revoking the whole token family), object storage (S3/Cloudinary) for images, cursor-based pagination for very large feeds, Redis-backed rate limiting for multi-instance deployments, and email verification / password reset.
+Cursor-based pagination for very large feeds, Redis-backed rate limiting for multi-instance deployments, magic-byte checks for locally stored uploads, pruning of used refresh tokens, automated frontend tests, and email verification / password reset.

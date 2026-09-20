@@ -10,6 +10,7 @@ A full-stack blogging platform: readers can browse and search posts, and registe
 | Auth | bcrypt password hashing, JWT access tokens, rotating refresh tokens in httpOnly cookies |
 | Validation | Zod (request bodies, params and query strings) |
 | Security | Helmet, CORS allow-list, rate limiting, upload restrictions |
+| Image storage | Cloudinary in production, local disk in development (pluggable storage layer) |
 | Testing | Vitest + Supertest (integration tests against a real MongoDB) |
 | Frontend | React 19, React Router, Axios, Tailwind CSS, Vite |
 | CI | GitHub Actions |
@@ -96,7 +97,7 @@ Status codes: `400` malformed request, `401` not authenticated, `403` not allowe
 - **Validation at the edge with Zod.** Strict string types also block NoSQL operator injection such as `{"email": {"$ne": null}}`.
 - **Central error handling.** Services throw `AppError`; one middleware converts everything (including Mongoose, Multer and JSON parse errors) to a consistent response and hides internals in production.
 - **Indexed queries.** Newest-first listing, a weighted text index for search and a compound `(blog, createdAt)` index for comments. Pagination limits are capped.
-- **Uploads are constrained:** MIME allow-list, size limit, server-generated filenames.
+- **Uploads are constrained:** MIME allow-list, size limit, server-generated filenames. Files are held in memory and only stored *after* validation and authorization pass, so rejected requests leave nothing behind. A small storage layer writes to Cloudinary when configured and to local disk otherwise.
 - **The app is built by a factory (`createApp`)** so tests run against the real middleware stack without opening a port.
 
 ## Getting started
@@ -129,7 +130,8 @@ npm run dev                 # http://localhost:5173 (proxies /api and /uploads t
 | `BCRYPT_ROUNDS` | `10` | bcrypt cost factor |
 | `SERVE_CLIENT` | `false` | Serve the built React app from the API (single-origin deployment) |
 | `COOKIE_SAMESITE` | `lax` | SameSite policy of the refresh cookie (`none` only for a cross-site frontend) |
-| `UPLOAD_DIR` / `MAX_UPLOAD_MB` | `uploads` / `2` | Image storage and size limit |
+| `CLOUDINARY_URL` | – (optional) | Store cover images on Cloudinary instead of local disk |
+| `UPLOAD_DIR` / `MAX_UPLOAD_MB` | `uploads` / `2` | Local image folder and upload size limit |
 
 ## Deployment
 
@@ -140,7 +142,15 @@ npm run build   # installs deps, builds the client into client/dist, installs se
 npm start       # starts the API; with SERVE_CLIENT=true it also serves the SPA
 ```
 
-Set `NODE_ENV=production`, `SERVE_CLIENT=true`, `MONGO_URI` (e.g. MongoDB Atlas) and a strong `ACCESS_TOKEN_SECRET` on the host. Uploaded images are stored on local disk, so use a persistent disk or object storage for production. (If the frontend is hosted separately, set `VITE_API_ORIGIN` in `client/`, `CLIENT_ORIGIN` on the API and `COOKIE_SAMESITE=none`.)
+Set `NODE_ENV=production`, `SERVE_CLIENT=true`, `MONGO_URI` (e.g. MongoDB Atlas) and a strong `ACCESS_TOKEN_SECRET` on the host. Set `CLOUDINARY_URL` so uploaded images persist (most hosts wipe local disk on restart). (If the frontend is hosted separately, set `VITE_API_ORIGIN` in `client/`, `CLIENT_ORIGIN` on the API and `COOKIE_SAMESITE=none`.)
+
+### Demo data and admin
+
+```bash
+cd server
+npm run seed                        # 2 demo users (password123), 6 posts, a few comments; safe to re-run
+npm run make-admin -- alice@example.com   # promote a user to ADMIN
+```
 
 ## Tests
 
@@ -149,7 +159,7 @@ cd server
 npm test
 ```
 
-The suite runs against a real MongoDB (`mongodb://localhost:27017/blogify_test` by default, override with `MONGO_URI_TEST`) and covers registration and login, refresh-token rotation and revocation, authorization (owner vs. other user vs. admin), validation errors, pagination and search, upload restrictions and cascading deletes.
+The suite runs against a real MongoDB (`mongodb://localhost:27017/blogify_test` by default, override with `MONGO_URI_TEST`) and covers registration and login, refresh-token rotation and revocation, authorization (owner vs. other user vs. admin), validation errors, pagination and search, upload restrictions, the Cloudinary storage adapter (with the SDK mocked) and cascading deletes.
 
 ## Possible improvements
 

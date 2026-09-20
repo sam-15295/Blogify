@@ -1,15 +1,24 @@
 import { z } from "zod";
+import { text } from "./common.js";
 
-// bcrypt only hashes the first 72 bytes, so longer passwords give a false sense of security.
-const password = z.string().min(8, "Password must be at least 8 characters").max(72);
+const email = text("Email").trim().toLowerCase().email("Enter a valid email address");
+
+// bcrypt only uses the first 72 BYTES, not characters. Emoji and accented letters take several bytes,
+// so a longer password would be silently truncated and give a false sense of security.
+const password = text("Password")
+  .min(8, "Password must be at least 8 characters")
+  .refine((value) => Buffer.byteLength(value, "utf8") <= 72, "Password is too long (72 bytes at most)");
 
 export const registerSchema = z.object({
-  fullName: z.string().trim().min(2).max(60),
-  email: z.string().trim().toLowerCase().email(),
+  fullName: text("Full name")
+    .trim()
+    .min(2, "Full name must be at least 2 characters")
+    .max(60, "Full name must be at most 60 characters"),
+  email,
   password,
 });
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(1).max(72),
+  email,
+  password: text("Password").min(1, "Password is required").max(128, "Password is too long"),
 });

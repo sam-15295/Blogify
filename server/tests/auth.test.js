@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { RefreshToken } from "../src/models/refreshToken.js";
@@ -75,6 +76,21 @@ describe("GET /api/auth/me", () => {
     const res = await request(app).get("/api/auth/me").set(bearer(token));
     expect(res.status).toBe(200);
     expect(res.body.data.user.email).toBe("test@example.com");
+  });
+});
+
+describe("access token signature", () => {
+  it("rejects a forged token, but the refresh cookie still gives the user a valid one", async () => {
+    const { cookies, user } = await registerUser();
+    // an attacker (or an old secret) signing an ADMIN token with a different key
+    const forged = jwt.sign({ role: "ADMIN" }, "some-other-secret-some-other-secret-1234", { subject: user._id });
+
+    expect((await request(app).get("/api/auth/me").set(bearer(forged))).status).toBe(401);
+
+    // refresh tokens are random values stored in the database, not signed with the JWT secret
+    const renewed = await refresh(cookieValue(cookies));
+    expect(renewed.status).toBe(200);
+    expect((await request(app).get("/api/auth/me").set(bearer(renewed.body.data.accessToken))).status).toBe(200);
   });
 });
 

@@ -27,8 +27,7 @@ export function errorHandler(err, req, res, _next) {
 
   if (!known) {
     // Programmer / unexpected error: log everything, reveal nothing.
-    req.log?.error({ err }, "Unhandled error");
-    logger.error({ err }, "Unhandled error");
+    (req.log ?? logger).error({ err }, "Unhandled error");
     return res.status(500).json({
       error: { code: "INTERNAL_ERROR", message: "Something went wrong", ...(!isProd && { stack: err.stack }) },
     });

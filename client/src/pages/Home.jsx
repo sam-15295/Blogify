@@ -25,8 +25,8 @@ export default function Home() {
     <div>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Latest posts</h1>
-          <p className="mt-1 text-slate-600">Stories and ideas from the Blogify community.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-fg">Latest posts</h1>
+          <p className="mt-1 text-muted">Stories and ideas from the Blogify community.</p>
         </div>
         <input
           type="search"

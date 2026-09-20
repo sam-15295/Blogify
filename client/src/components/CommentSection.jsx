@@ -48,8 +48,8 @@ export default function CommentSection({ blogId }) {
 
   return (
     <section aria-labelledby="comments-heading" className="mt-12">
-      <h2 id="comments-heading" className="text-xl font-semibold text-slate-900">
-        Comments {data && <span className="text-slate-400">({data.meta.total})</span>}
+      <h2 id="comments-heading" className="text-xl font-semibold text-fg">
+        Comments {data && <span className="text-faint">({data.meta.total})</span>}
       </h2>
 
       {user ? (
@@ -70,8 +70,8 @@ export default function CommentSection({ blogId }) {
           </Button>
         </form>
       ) : (
-        <p className="mt-4 text-sm text-slate-600">
-          <Link to="/login" state={{ from: `/blogs/${blogId}` }} className="font-medium text-brand-700 underline">
+        <p className="mt-4 text-sm text-muted">
+          <Link to="/login" state={{ from: `/blogs/${blogId}` }} className="font-medium text-brand-400 underline">
             Log in
           </Link>{" "}
           to join the discussion.
@@ -81,24 +81,24 @@ export default function CommentSection({ blogId }) {
       <div className="mt-6">
         {loading && !data ? <Spinner label="Loading comments…" /> : null}
         <ErrorMessage message={error} onRetry={reload} />
-        {data?.data.length === 0 && <p className="text-sm text-slate-500">No comments yet. Be the first!</p>}
+        {data?.data.length === 0 && <p className="text-sm text-muted">No comments yet. Be the first!</p>}
 
         <ul className="space-y-4">
           {data?.data.map((comment) => (
-            <li key={comment._id} className="rounded-lg border border-slate-200 bg-white p-4">
-              <div className="flex items-center justify-between text-xs text-slate-500">
+            <li key={comment._id} className="rounded-lg border border-line bg-surface p-4">
+              <div className="flex items-center justify-between text-xs text-muted">
                 <span>
-                  <strong className="text-slate-700">{comment.createdBy?.fullName ?? "Deleted user"}</strong> ·{" "}
+                  <strong className="text-fg">{comment.createdBy?.fullName ?? "Deleted user"}</strong> ·{" "}
                   {formatDate(comment.createdAt)}
                 </span>
                 {canDelete(comment) && (
-                  <button onClick={() => handleDelete(comment._id)} className="text-red-600 hover:underline">
+                  <button onClick={() => handleDelete(comment._id)} className="text-danger-fg hover:underline">
                     Delete
                   </button>
                 )}
               </div>
               {/* Rendered as text: React escapes it, so user input cannot inject HTML/JS (XSS-safe). */}
-              <p className="mt-2 whitespace-pre-wrap wrap-break-word text-slate-800">{comment.content}</p>
+              <p className="mt-2 whitespace-pre-wrap wrap-break-word text-fg">{comment.content}</p>
             </li>
           ))}
         </ul>

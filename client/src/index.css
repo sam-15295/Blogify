@@ -1,14 +1,62 @@
 @import "tailwindcss";
 
+/*
+  Design tokens. Components use these names (bg-surface, text-muted, border-line…) instead of raw
+  palette shades, so the whole look can be changed here. Text pairs meet WCAG AA (4.5:1) and form
+  borders meet the 3:1 rule for interface components.
+*/
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-bg: #0b0f19; /* page background and input fields */
+  --color-surface: #121a2b; /* cards, navbar, forms */
+  --color-surface-2: #1a2438; /* hover / raised */
+  --color-line: #263148; /* subtle dividers and card borders */
+  --color-line-strong: #566788; /* form controls and secondary buttons */
+
+  --color-fg: #e8ecf4; /* primary text */
+  --color-muted: #a3aec4; /* secondary text */
+  --color-faint: #8492ab; /* tertiary text, placeholders */
+
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8; /* links, focus ring */
   --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
+  --color-brand-600: #4f46e5; /* primary buttons (white text: 6.3:1) */
+  --color-brand-hover: #5b51f0; /* primary button hover (white text: 5.4:1) */
+
+  --color-danger: #ef4444;
+  --color-danger-fg: #fca5a5; /* error text on dark (9:1) */
 }
 
-body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+@layer base {
+  html {
+    color-scheme: dark; /* dark scrollbars, file picker, date controls, form defaults */
+  }
+
+  body {
+    @apply bg-bg text-fg antialiased;
+    /* a faint brand-colored glow behind the header gives the flat dark page some depth */
+    background-image: radial-gradient(60rem 26rem at 50% -8rem, rgb(99 102 241 / 0.16), transparent 70%);
+    background-repeat: no-repeat;
+    scrollbar-color: #3a4763 var(--color-bg);
+  }
+
+  ::selection {
+    background: rgb(99 102 241 / 0.5);
+    color: #fff;
+  }
+
+  /* Keyboard focus must stay visible on dark backgrounds. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+  }
+
+  /* Browsers paint autofilled inputs light blue; keep them on-theme. */
+  input:-webkit-autofill,
+  textarea:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--color-bg) inset;
+    -webkit-text-fill-color: var(--color-fg);
+    caret-color: var(--color-fg);
+  }
 }

@@ -108,9 +108,9 @@ export default function BlogEditor() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900">{isEdit ? "Edit post" : "Write a new post"}</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-fg">{isEdit ? "Edit post" : "Write a new post"}</h1>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm" noValidate>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5 rounded-xl border border-line bg-surface p-6 shadow-xl shadow-black/30" noValidate>
         <FormField label="Title" id="title" error={errors.title}>
           <input id="title" name="title" maxLength={150} className={inputClass} value={form.title} onChange={handleChange} />
         </FormField>
@@ -120,7 +120,7 @@ export default function BlogEditor() {
             id="coverImage"
             type="file"
             accept={IMAGE_TYPES.join(",")}
-            className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
+            className="block w-full text-sm text-muted file:mr-4 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-400 hover:file:bg-brand-500/25"
             onChange={handleImageChange}
           />
           <CoverImage src={shownImage} alt="Cover preview" className="mt-3 max-h-56 rounded-lg object-cover" />

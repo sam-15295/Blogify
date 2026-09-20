@@ -33,9 +33,9 @@ export default function Login() {
   };
 
   return (
-    <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-      <p className="mt-1 text-sm text-slate-600">Log in to write posts and join the discussion.</p>
+    <div className="mx-auto max-w-md rounded-xl border border-line bg-surface p-8 shadow-xl shadow-black/30">
+      <h1 className="text-2xl font-bold text-fg">Welcome back</h1>
+      <p className="mt-1 text-sm text-muted">Log in to write posts and join the discussion.</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <FormField label="Email" id="email">
@@ -50,9 +50,9 @@ export default function Login() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-muted">
         New here?{" "}
-        <Link to="/register" className="font-medium text-brand-700 underline">
+        <Link to="/register" className="font-medium text-brand-400 underline">
           Create an account
         </Link>
       </p>

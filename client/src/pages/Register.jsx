@@ -36,9 +36,9 @@ export default function Register() {
   };
 
   return (
-    <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
-      <p className="mt-1 text-sm text-slate-600">It takes less than a minute.</p>
+    <div className="mx-auto max-w-md rounded-xl border border-line bg-surface p-8 shadow-xl shadow-black/30">
+      <h1 className="text-2xl font-bold text-fg">Create your account</h1>
+      <p className="mt-1 text-sm text-muted">It takes less than a minute.</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
         <FormField label="Full name" id="fullName" error={fieldErrors.fullName}>
@@ -56,9 +56,9 @@ export default function Register() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link to="/login" className="font-medium text-brand-700 underline">
+        <Link to="/login" className="font-medium text-brand-400 underline">
           Log in
         </Link>
       </p>

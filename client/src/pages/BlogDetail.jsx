@@ -36,13 +36,13 @@ export default function BlogDetail() {
 
   return (
     <article className="mx-auto max-w-3xl">
-      <Link to="/" className="text-sm text-slate-500 hover:text-brand-700">
+      <Link to="/" className="text-sm text-muted hover:text-brand-300">
         ← All posts
       </Link>
 
-      <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">{blog.title}</h1>
-      <p className="mt-3 text-sm text-slate-500">
-        By <strong className="text-slate-700">{blog.createdBy?.fullName ?? "Unknown author"}</strong> ·{" "}
+      <h1 className="mt-4 text-4xl font-bold tracking-tight text-fg">{blog.title}</h1>
+      <p className="mt-3 text-sm text-muted">
+        By <strong className="text-fg">{blog.createdBy?.fullName ?? "Unknown author"}</strong> ·{" "}
         {formatDate(blog.createdAt)}
         {blog.updatedAt !== blog.createdAt && " · edited"}
       </p>
@@ -51,7 +51,7 @@ export default function BlogDetail() {
         <div className="mt-4 flex gap-3">
           <Link
             to={`/blogs/${blog._id}/edit`}
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center rounded-lg border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-fg hover:bg-surface-2"
           >
             Edit
           </Link>
@@ -67,7 +67,7 @@ export default function BlogDetail() {
       <CoverImage src={cover} className="mt-8 max-h-96 w-full rounded-xl object-cover" />
 
       {/* Plain text (escaped by React) with line breaks preserved. No HTML/markdown is ever injected. */}
-      <div className="mt-8 whitespace-pre-wrap wrap-break-word text-lg leading-8 text-slate-800">{blog.body}</div>
+      <div className="mt-8 whitespace-pre-wrap wrap-break-word text-lg leading-8 text-fg/90">{blog.body}</div>
 
       <CommentSection blogId={blog._id} />
     </article>

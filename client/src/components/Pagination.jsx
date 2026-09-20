@@ -8,7 +8,7 @@ export default function Pagination({ meta, onPageChange }) {
       <Button variant="secondary" disabled={meta.page <= 1} onClick={() => onPageChange(meta.page - 1)}>
         Previous
       </Button>
-      <span className="text-sm text-slate-600">
+      <span className="text-sm text-muted">
         Page {meta.page} of {meta.totalPages}
       </span>
       <Button variant="secondary" disabled={meta.page >= meta.totalPages} onClick={() => onPageChange(meta.page + 1)}>

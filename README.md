@@ -127,9 +127,20 @@ npm run dev                 # http://localhost:5173 (proxies /api and /uploads t
 | `ACCESS_TOKEN_TTL` | `15m` | Access token lifetime |
 | `REFRESH_TOKEN_TTL_DAYS` | `7` | Refresh token lifetime |
 | `BCRYPT_ROUNDS` | `10` | bcrypt cost factor |
+| `SERVE_CLIENT` | `false` | Serve the built React app from the API (single-origin deployment) |
+| `COOKIE_SAMESITE` | `lax` | SameSite policy of the refresh cookie (`none` only for a cross-site frontend) |
 | `UPLOAD_DIR` / `MAX_UPLOAD_MB` | `uploads` / `2` | Image storage and size limit |
 
-For a deployed frontend set `VITE_API_ORIGIN` (see `client/.env.example`) to the API's URL.
+## Deployment
+
+The app deploys as **one web service**: the Express API also serves the built React app, so the browser sees a single origin. That keeps the refresh cookie first-party (`SameSite=Lax`), removes the need for CORS and avoids running two services.
+
+```bash
+npm run build   # installs deps, builds the client into client/dist, installs server production deps
+npm start       # starts the API; with SERVE_CLIENT=true it also serves the SPA
+```
+
+Set `NODE_ENV=production`, `SERVE_CLIENT=true`, `MONGO_URI` (e.g. MongoDB Atlas) and a strong `ACCESS_TOKEN_SECRET` on the host. Uploaded images are stored on local disk, so use a persistent disk or object storage for production. (If the frontend is hosted separately, set `VITE_API_ORIGIN` in `client/`, `CLIENT_ORIGIN` on the API and `COOKIE_SAMESITE=none`.)
 
 ## Tests
 

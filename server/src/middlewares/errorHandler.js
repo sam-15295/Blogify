@@ -17,6 +17,7 @@ function normalize(err) {
   if (err.code === 11000) return AppError.conflict("Duplicate value: resource already exists");
   if (err.name === "CastError") return AppError.badRequest(`Invalid ${err.path}`);
   if (err.type === "entity.parse.failed") return AppError.badRequest("Malformed JSON body");
+  if (err.type === "entity.too.large") return new AppError(413, "PAYLOAD_TOO_LARGE", "Request body is too large");
   return null;
 }
 

@@ -16,9 +16,3 @@ export function authenticate(req, _res, next) {
     next(AppError.unauthorized("Invalid or expired token"));
   }
 }
-
-// Role-based access control: requireRole("ADMIN")
-export const requireRole =
-  (...roles) =>
-  (req, _res, next) =>
-    roles.includes(req.user?.role) ? next() : next(AppError.forbidden());

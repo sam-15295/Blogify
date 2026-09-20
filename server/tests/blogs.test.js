@@ -1,6 +1,8 @@
+import fs from "node:fs";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { Comment } from "../src/models/comment.js";
+import { uploadDir } from "../src/storage/diskStorage.js";
 import { app, bearer, createAdmin, createBlog, registerUser } from "./helpers.js";
 
 const PNG = Buffer.from("89504e470d0a1a0a", "hex");
@@ -43,6 +45,21 @@ describe("POST /api/blogs", () => {
 
     const bad = await send(Buffer.from("<script>alert(1)</script>"), "evil.html", "text/html");
     expect(bad.status).toBe(400);
+  });
+
+  it("leaves no file on disk when the request is rejected after the upload", async () => {
+    const { token } = await registerUser();
+    const filesBefore = fs.readdirSync(uploadDir).length;
+
+    const res = await request(app)
+      .post("/api/blogs")
+      .set(bearer(token))
+      .field("title", "Hi")
+      .field("body", "short")
+      .attach("coverImage", PNG, { filename: "cover.png", contentType: "image/png" });
+
+    expect(res.status).toBe(422);
+    expect(fs.readdirSync(uploadDir).length).toBe(filesBefore);
   });
 
   it("rejects images over the size limit", async () => {

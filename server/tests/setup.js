@@ -2,7 +2,7 @@ import fs from "node:fs";
 import mongoose from "mongoose";
 import { afterAll, beforeAll, beforeEach } from "vitest";
 import { connectDB } from "../src/config/db.js";
-import { uploadDir } from "../src/middlewares/upload.js";
+import { uploadDir } from "../src/storage/diskStorage.js";
 
 beforeAll(async () => {
   fs.mkdirSync(uploadDir, { recursive: true });

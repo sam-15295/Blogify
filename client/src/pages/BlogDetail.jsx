@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { blogApi } from "../api/services.js";
 import CommentSection from "../components/CommentSection.jsx";
+import CoverImage from "../components/CoverImage.jsx";
 import { Button, ErrorMessage, Spinner } from "../components/ui.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useFetch } from "../hooks/useFetch.js";
@@ -63,7 +64,7 @@ export default function BlogDetail() {
         <ErrorMessage message={actionError} />
       </div>
 
-      {cover && <img src={cover} alt="" className="mt-8 max-h-96 w-full rounded-xl object-cover" />}
+      <CoverImage src={cover} className="mt-8 max-h-96 w-full rounded-xl object-cover" />
 
       {/* Plain text (escaped by React) with line breaks preserved. No HTML/markdown is ever injected. */}
       <div className="mt-8 whitespace-pre-wrap wrap-break-word text-lg leading-8 text-slate-800">{blog.body}</div>

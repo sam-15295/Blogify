@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { blogApi } from "../api/services.js";
+import CoverImage from "../components/CoverImage.jsx";
 import { Button, ErrorMessage, FormField, Spinner, inputClass } from "../components/ui.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { assetUrl, parseApiError } from "../utils/format.js";
@@ -122,7 +123,7 @@ export default function BlogEditor() {
             className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand-700 hover:file:bg-brand-100"
             onChange={handleImageChange}
           />
-          {shownImage && <img src={shownImage} alt="Cover preview" className="mt-3 max-h-56 rounded-lg object-cover" />}
+          <CoverImage src={shownImage} alt="Cover preview" className="mt-3 max-h-56 rounded-lg object-cover" />
         </FormField>
 
         <FormField label="Body" id="body" error={errors.body}>

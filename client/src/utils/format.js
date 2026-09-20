@@ -1,7 +1,11 @@
 import { API_ORIGIN } from "../api/http.js";
 
-// Server returns image paths like /uploads/abc.png; in production the API lives on another origin.
-export const assetUrl = (path) => (path ? `${API_ORIGIN}${path}` : null);
+// Images are either absolute URLs (Cloudinary) or local paths like /uploads/abc.png,
+// which need the API origin in front when the API lives on another origin.
+export const assetUrl = (path) => {
+  if (!path) return null;
+  return /^https?:\/\//.test(path) ? path : `${API_ORIGIN}${path}`;
+};
 
 export const formatDate = (iso) =>
   new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });

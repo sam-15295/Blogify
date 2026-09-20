@@ -1,7 +1,4 @@
 import * as blogService from "../services/blogService.js";
-import { toPublicUrl } from "../utils/files.js";
-
-const uploaded = (file) => (file ? { url: toPublicUrl(file) } : undefined);
 
 export async function list(req, res) {
   const { items, meta } = await blogService.listBlogs(req.validated.query);
@@ -14,12 +11,12 @@ export async function getOne(req, res) {
 }
 
 export async function create(req, res) {
-  const blog = await blogService.createBlog(req.user.id, req.validated.body, uploaded(req.file));
+  const blog = await blogService.createBlog(req.user.id, req.validated.body, req.file);
   res.status(201).json({ data: blog });
 }
 
 export async function update(req, res) {
-  const blog = await blogService.updateBlog(req.user, req.validated.params.id, req.validated.body, uploaded(req.file));
+  const blog = await blogService.updateBlog(req.user, req.validated.params.id, req.validated.body, req.file);
   res.json({ data: blog });
 }
 

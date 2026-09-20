@@ -2,7 +2,7 @@ import { Blog } from "../models/blog.js";
 import { Comment } from "../models/comment.js";
 import { AppError } from "../utils/AppError.js";
 import { assertOwnerOrAdmin } from "../utils/permissions.js";
-import { removeUpload } from "../utils/files.js";
+import { imageStorage } from "../storage/index.js";
 
 const AUTHOR_FIELDS = "fullName";
 
@@ -32,8 +32,14 @@ export async function getBlog(id) {
 }
 
 export async function createBlog(userId, { title, body }, file) {
-  const blog = await Blog.create({ title, body, createdBy: userId, coverImageURL: file?.url });
-  return blog.populate("createdBy", AUTHOR_FIELDS);
+  const coverImageURL = file ? await imageStorage.save(file) : undefined;
+  try {
+    const blog = await Blog.create({ title, body, createdBy: userId, coverImageURL });
+    return await blog.populate("createdBy", AUTHOR_FIELDS);
+  } catch (err) {
+    await imageStorage.remove(coverImageURL); // don't leave an orphaned image behind
+    throw err;
+  }
 }
 
 export async function updateBlog(user, id, changes, file) {
@@ -41,13 +47,21 @@ export async function updateBlog(user, id, changes, file) {
   if (!blog) throw AppError.notFound("Blog not found");
   assertOwnerOrAdmin(user, blog.createdBy);
 
+  // The new image is stored only after the ownership check, so strangers can't upload anything.
   const previousImage = blog.coverImageURL;
-  // Assign through the document (not findByIdAndUpdate) so the excerpt hook runs.
-  blog.set(changes);
-  if (file) blog.coverImageURL = file.url;
-  await blog.save();
+  const newImage = file ? await imageStorage.save(file) : undefined;
 
-  if (file) await removeUpload(previousImage);
+  try {
+    // Assign through the document (not findByIdAndUpdate) so the excerpt hook runs.
+    blog.set(changes);
+    if (newImage) blog.coverImageURL = newImage;
+    await blog.save();
+  } catch (err) {
+    await imageStorage.remove(newImage);
+    throw err;
+  }
+
+  if (newImage) await imageStorage.remove(previousImage);
   return blog.populate("createdBy", AUTHOR_FIELDS);
 }
 
@@ -59,5 +73,5 @@ export async function deleteBlog(user, id) {
   // Comments have no meaning without their blog. Not wrapped in a transaction (needs a replica
   // set); the worst case is orphaned comments, which are unreachable through the API.
   await Promise.all([blog.deleteOne(), Comment.deleteMany({ blog: blog._id })]);
-  await removeUpload(blog.coverImageURL);
+  await imageStorage.remove(blog.coverImageURL);
 }

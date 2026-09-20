@@ -11,6 +11,8 @@ const envSchema = z.object({
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(14).default(10),
   COOKIE_SAMESITE: z.enum(["lax", "strict", "none"]).default("lax"),
   SERVE_CLIENT: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
+  // Optional. When set, cover images go to Cloudinary; otherwise they are saved on local disk.
+  CLOUDINARY_URL: z.preprocess((v) => (v === "" ? undefined : v), z.string().startsWith("cloudinary://").optional()),
   UPLOAD_DIR: z.string().default("uploads"),
   MAX_UPLOAD_MB: z.coerce.number().positive().default(2),
 });

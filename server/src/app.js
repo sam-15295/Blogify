@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import { env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
-import { uploadDir } from "./middlewares/upload.js";
+import { uploadDir } from "./storage/diskStorage.js";
 import { apiLimiter } from "./middlewares/rateLimit.js";
 import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 import routes from "./routes/index.js";
@@ -29,8 +29,8 @@ export function createApp({ serveClient = env.SERVE_CLIENT, clientDist = default
       contentSecurityPolicy: {
         directives: {
           ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-          // blob: is needed for the cover-image preview in the post editor.
-          "img-src": ["'self'", "data:", "blob:"],
+          // blob: powers the cover-image preview in the editor; res.cloudinary.com serves uploaded covers in production.
+          "img-src": ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
         },
       },
     }),

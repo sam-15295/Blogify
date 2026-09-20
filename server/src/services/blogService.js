@@ -9,7 +9,7 @@ const AUTHOR_FIELDS = "fullName";
 export async function listBlogs({ page, limit, q }) {
   const filter = q ? { $text: { $search: q } } : {};
   // Relevance ordering for searches, newest-first otherwise. Body is excluded from list payloads.
-  const sort = q ? { score: { $meta: "textScore" }, createdAt: -1 } : { createdAt: -1 };
+  const sort = q ? { score: { $meta: "textScore" }, createdAt: -1, _id: -1 } : { createdAt: -1, _id: -1 };
   const projection = q ? { body: 0, __v: 0, score: { $meta: "textScore" } } : { body: 0, __v: 0 };
 
   const [items, total] = await Promise.all([

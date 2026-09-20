@@ -13,7 +13,7 @@ export async function listComments(blogId, { page, limit }) {
 
   const [items, total] = await Promise.all([
     Comment.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .populate("createdBy", "fullName")

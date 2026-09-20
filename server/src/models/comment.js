@@ -10,7 +10,7 @@ const commentSchema = new Schema(
 );
 
 // Serves "comments of a blog, newest first" without an in-memory sort.
-commentSchema.index({ blog: 1, createdAt: -1 });
+commentSchema.index({ blog: 1, createdAt: -1, _id: -1 });
 
 commentSchema.set("toJSON", {
   transform(_doc, ret) {

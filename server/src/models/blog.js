@@ -13,8 +13,8 @@ const blogSchema = new Schema(
   { timestamps: true },
 );
 
-// Newest-first listing; the sort key is indexed so pagination doesn't scan the collection.
-blogSchema.index({ createdAt: -1 });
+// Newest-first listing. _id is a tie-breaker so posts sharing a timestamp keep a stable order across pages.
+blogSchema.index({ createdAt: -1, _id: -1 });
 // Powers ?q= search. Title matches rank higher than body matches.
 blogSchema.index({ title: "text", body: "text" }, { weights: { title: 5, body: 1 } });
 

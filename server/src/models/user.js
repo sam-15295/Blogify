@@ -17,6 +17,8 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, env.BCRYPT_ROUNDS);
 });
 
+userSchema.statics.hashSync = (plain) => bcrypt.hashSync(plain, env.BCRYPT_ROUNDS);
+
 userSchema.methods.comparePassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };

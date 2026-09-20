@@ -6,8 +6,8 @@ const COOKIE_NAME = "refreshToken";
 const cookieOptions = {
   httpOnly: true, // not readable by JavaScript, which limits the damage of an XSS bug
   secure: isProd, // HTTPS only in production
-  // Frontend and API are on different sites in production, which requires SameSite=None.
-  sameSite: isProd ? "none" : "lax",
+  // "lax" when the SPA and API share a site (the default deployment). "none" is only for a cross-site frontend.
+  sameSite: env.COOKIE_SAMESITE,
   path: "/api/auth", // the browser only sends it to the auth endpoints
 };
 

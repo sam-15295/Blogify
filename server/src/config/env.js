@@ -9,6 +9,8 @@ const envSchema = z.object({
   ACCESS_TOKEN_TTL: z.string().default("15m"),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
   BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(14).default(10),
+  COOKIE_SAMESITE: z.enum(["lax", "strict", "none"]).default("lax"),
+  SERVE_CLIENT: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
   UPLOAD_DIR: z.string().default("uploads"),
   MAX_UPLOAD_MB: z.coerce.number().positive().default(2),
 });

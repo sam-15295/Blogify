@@ -1,0 +1,12 @@
+{
+  "name": "blogify",
+  "private": true,
+  "description": "Root scripts used to build and start the app on a single host (e.g. Render)",
+  "scripts": {
+    "build": "npm --prefix client ci --include=dev && npm --prefix client run build && npm --prefix server ci --omit=dev",
+    "start": "npm --prefix server start"
+  },
+  "engines": {
+    "node": ">=20.6"
+  }
+}

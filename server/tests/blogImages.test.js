@@ -88,6 +88,34 @@ describe("blog cover images go through the storage layer at the right moment", (
     expect(storage.remove).toHaveBeenCalledWith(URL_1);
   });
 
+  it("allows changing only the cover image", async () => {
+    const { token } = await registerUser();
+    const created = await postWithImage(token);
+    storage.save.mockResolvedValueOnce(URL_2);
+
+    const res = await request(app)
+      .patch(`/api/blogs/${created.body.data._id}`)
+      .set(bearer(token))
+      .attach("coverImage", PNG, { filename: "new.png", contentType: "image/png" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.coverImageURL).toBe(URL_2);
+    expect(res.body.data.title).toBe("A post with an image");
+    expect(storage.remove).toHaveBeenCalledWith(URL_1);
+  });
+
+  it("rejects an update that changes nothing, without touching storage", async () => {
+    const { token } = await registerUser();
+    const created = await postWithImage(token);
+    storage.save.mockClear();
+
+    const res = await request(app).patch(`/api/blogs/${created.body.data._id}`).set(bearer(token)).send({});
+
+    expect(res.status).toBe(422);
+    expect(res.body.error.message).toMatch(/at least one of/);
+    expect(storage.save).not.toHaveBeenCalled();
+  });
+
   it("removes the stored image when the post is deleted", async () => {
     const { token } = await registerUser();
     const created = await postWithImage(token);

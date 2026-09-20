@@ -43,6 +43,10 @@ export async function createBlog(userId, { title, body }, file) {
 }
 
 export async function updateBlog(user, id, changes, file) {
+  if (!file && Object.values(changes).every((value) => value === undefined)) {
+    throw new AppError(422, "VALIDATION_ERROR", "Provide at least one of: title, body, cover image");
+  }
+
   const blog = await Blog.findById(id);
   if (!blog) throw AppError.notFound("Blog not found");
   assertOwnerOrAdmin(user, blog.createdBy);
